@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bulk Change — Independent Concept Prototype</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;background:#F4F8F9;color:#1A1A1A;font-size:14px;height:100vh;overflow:hidden}
+.topbar{background:#fff;border-bottom:1px solid #D5E2E6;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px;color:#0F5F73}
+.logo-mark{background:#0F5F73;color:#fff;font-size:10px;font-weight:800;padding:4px 6px;border-radius:4px}
+.breadcrumb{font-size:12px;color:#7F95A0}.breadcrumb b{color:#22343C}
+.change-label{font-size:12px;background:#E6F2F5;color:#0F5F73;padding:4px 10px;border-radius:100px;font-weight:600}
+.steps{background:#fff;border-bottom:1px solid #D5E2E6;padding:0 20px;display:flex;align-items:center;height:44px;flex-shrink:0}
+.step{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:#B0A0BA}
+.step-arrow{color:#D0C8D8;font-size:14px;padding:0 5px}
+.step.active{color:#0F5F73;font-weight:700}
+.step.done{color:#1A7A4A}
+.sn{width:18px;height:18px;border-radius:50%;background:#E8E0EC;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#7F95A0;flex-shrink:0}
+.step.active .sn{background:#0F5F73;color:#fff}
+.step.done .sn{background:#1A7A4A;color:#fff}
+.screen{display:none;height:calc(100vh - 96px);flex-direction:column}
+.screen.active{display:flex}
+
+/* SCREEN 1 */
+.s1-layout{display:grid;grid-template-columns:260px 1fr;flex:1;overflow:hidden}
+.filter-panel{background:#fff;border-right:1px solid #D5E2E6;padding:20px;overflow-y:auto}
+.fp-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#7F95A0;margin-bottom:16px}
+.fg{margin-bottom:18px}.fl{font-size:12px;font-weight:600;color:#22343C;margin-bottom:6px}
+.fs{width:100%;padding:7px 10px;border:1px solid #D5E2E6;border-radius:6px;font-size:13px;background:#fff;color:#1A1A1A}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.tag{background:#E6F2F5;color:#0F5F73;font-size:11px;font-weight:600;padding:3px 8px;border-radius:100px}
+.upload-zone{width:100%;padding:10px;border:1.5px dashed #B5C7CE;border-radius:6px;background:#F7FAFB;color:#0F5F73;font-size:12px;font-weight:600;cursor:pointer;text-align:center;margin-top:4px}
+.fp-divider{border:none;border-top:1px solid #E9F0F2;margin:14px 0}
+.table-area{display:flex;flex-direction:column;overflow:hidden}
+.table-header{padding:14px 20px;background:#fff;border-bottom:1px solid #D5E2E6;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.th-left{display:flex;align-items:center;gap:8px}
+.th-title{font-size:15px;font-weight:700}
+.count-badge{background:#0F5F73;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px}
+.search-input{padding:7px 12px;border:1px solid #D5E2E6;border-radius:6px;font-size:13px;width:200px}
+.select-bar{background:#E6F2F5;padding:7px 20px;border-bottom:1px solid #D5E2E6;font-size:12px;color:#0B4A5B;flex-shrink:0}
+.select-bar a{color:#0F5F73;font-weight:700;cursor:pointer;text-decoration:underline}
+.table-scroll{flex:1;overflow-y:auto}
+table{width:100%;border-collapse:collapse}
+thead th{background:#F4F8F9;padding:9px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #D5E2E6;position:sticky;top:0}
+tbody tr{border-bottom:1px solid #EDF3F5;background:#fff}
+tbody tr:hover{background:#F7FAFB}
+tbody tr.sel{background:#E6F2F5}
+td{padding:10px 16px;font-size:13px}
+.av{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;margin-right:7px;vertical-align:middle}
+.emp-name{font-weight:600}
+.pill{font-size:11px;padding:2px 7px;border-radius:4px;font-weight:600}
+.pill-p{background:#E3ECEF;color:#0B4A5B}
+.pill-l{background:#E6F0ED;color:#1A5A3A}
+input[type=checkbox]{accent-color:#0F5F73;width:14px;height:14px;cursor:pointer}
+
+/* FOOTER */
+.footer{background:#fff;border-top:1px solid #D5E2E6;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.footer-info{font-size:13px;color:#4A4A4A}.footer-info b{color:#0F5F73}
+.btn-row{display:flex;gap:10px}
+.btn-sec{padding:8px 16px;border:1px solid #D5E2E6;border-radius:6px;background:#fff;color:#22343C;font-size:13px;font-weight:600;cursor:pointer}
+.btn-sec:hover{background:#F4F8F9}
+.btn-pri{padding:8px 20px;border:none;border-radius:6px;background:#0F5F73;color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+.btn-pri:hover{background:#5A1A68}
+.btn-danger{padding:8px 20px;border:none;border-radius:6px;background:#DC2626;color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+
+/* SCREEN 2 - ATTRIBUTE SELECTION */
+.s2-layout{display:grid;grid-template-columns:1fr 280px;flex:1;overflow:hidden}
+.attr-main{overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:20px}
+.attr-header{padding:14px 24px;background:#fff;border-bottom:1px solid #D5E2E6;flex-shrink:0}
+.attr-header-title{font-size:15px;font-weight:700}
+.attr-header-sub{font-size:12px;color:#5E7480;margin-top:3px}
+
+/* Templates */
+.template-section{}
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#7F95A0;margin-bottom:10px}
+.template-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.template-card{border:1.5px solid #D5E2E6;border-radius:8px;padding:14px;cursor:pointer;background:#fff;transition:all .15s;position:relative}
+.template-card:hover{border-color:#0F5F73;background:#F7FAFB}
+.template-card.tpl-active{border-color:#0F5F73;background:#E6F2F5}
+.tpl-icon{font-size:20px;margin-bottom:8px}
+.tpl-name{font-size:13px;font-weight:700;color:#1A1A1A;margin-bottom:4px}
+.tpl-attrs{font-size:11px;color:#5E7480;line-height:1.5}
+.tpl-check{position:absolute;top:10px;right:10px;width:18px;height:18px;background:#0F5F73;border-radius:50%;display:none;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800}
+.template-card.tpl-active .tpl-check{display:flex}
+
+/* Search */
+.attr-search{width:100%;padding:9px 14px;border:1.5px solid #D5E2E6;border-radius:8px;font-size:13px;color:#1A1A1A;background:#fff}
+.attr-search:focus{outline:none;border-color:#0F5F73;box-shadow:0 0 0 2px #0F5F7315}
+
+/* Category accordion */
+.cat-section{}
+.cat-item{border:1px solid #D5E2E6;border-radius:8px;background:#fff;margin-bottom:8px;overflow:hidden}
+.cat-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.cat-header:hover{background:#F7FAFB}
+.cat-left{display:flex;align-items:center;gap:10px}
+.cat-icon{font-size:16px}
+.cat-name{font-size:13px;font-weight:700;color:#1A1A1A}
+.cat-right{display:flex;align-items:center;gap:8px}
+.cat-count{font-size:11px;color:#7F95A0;background:#E9F0F2;padding:2px 7px;border-radius:100px;font-weight:600}
+.cat-selected-count{font-size:11px;background:#0F5F73;color:#fff;padding:2px 7px;border-radius:100px;font-weight:700;display:none}
+.cat-arrow{color:#7F95A0;font-size:12px;transition:transform .2s}
+.cat-body{display:none;border-top:1px solid #E9F0F2;padding:8px 0}
+.cat-item.open .cat-body{display:block}
+.cat-item.open .cat-arrow{transform:rotate(90deg)}
+.attr-row{padding:8px 16px 8px 16px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.attr-row:hover{background:#F7FAFB}
+.attr-row.attr-checked{background:#E6F2F5}
+.attr-name{font-size:13px;color:#2A1A32}
+.attr-desc{font-size:11px;color:#7F95A0;margin-left:auto}
+
+/* Right panel */
+.selected-panel{background:#fff;border-left:1px solid #D5E2E6;display:flex;flex-direction:column;overflow:hidden}
+.sp-header{padding:14px 16px;border-bottom:1px solid #D5E2E6;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.sp-title{font-size:13px;font-weight:700}
+.sp-count{background:#0F5F73;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:100px}
+.sp-body{flex:1;overflow-y:auto;padding:12px}
+.sp-empty{text-align:center;padding:32px 16px;color:#7F95A0;font-size:12px;line-height:1.6}
+.sp-chip{display:flex;align-items:center;justify-content:space-between;background:#E6F2F5;border:1px solid #B9D6DD;border-radius:6px;padding:8px 10px;margin-bottom:6px}
+.sp-chip-name{font-size:12px;font-weight:600;color:#0A3340}
+.sp-chip-cat{font-size:10px;color:#7F95A0;margin-top:1px}
+.sp-chip-remove{color:#7F95A0;cursor:pointer;font-size:16px;line-height:1;padding:0 2px}
+.sp-chip-remove:hover{color:#DC2626}
+.sp-footer{padding:12px;border-top:1px solid #D5E2E6;flex-shrink:0}
+.sp-cta{width:100%;padding:10px;border:none;border-radius:6px;background:#0F5F73;color:#fff;font-size:13px;font-weight:700;cursor:pointer}
+.sp-cta:disabled{background:#B5C7CE;cursor:not-allowed}
+.sp-cta:hover:not(:disabled){background:#5A1A68}
+.sp-clear{width:100%;padding:7px;border:1px solid #D5E2E6;border-radius:6px;background:#fff;color:#7F95A0;font-size:12px;font-weight:500;cursor:pointer;margin-bottom:8px}
+.sp-clear:hover{color:#DC2626;border-color:#FCA5A5}
+
+/* SCREEN 3 - INPUT VALUES */
+.s3-header{padding:14px 24px;background:#fff;border-bottom:1px solid #D5E2E6;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.s3-title{font-size:15px;font-weight:700}.s3-subtitle{font-size:12px;color:#5E7480;margin-top:2px}
+.import-btn{padding:7px 14px;border:1px solid #0F5F73;border-radius:6px;background:#fff;color:#0F5F73;font-size:12px;font-weight:600;cursor:pointer}
+.s3-body{flex:1;overflow-y:auto;padding:20px 24px}
+.warn-banner{background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px}
+.warn-text{font-size:12px;color:#92400E;line-height:1.5}.warn-text b{font-weight:700}
+.val-table-wrap{background:#fff;border-radius:8px;border:1px solid #D5E2E6;overflow:hidden}
+.anomaly-row{background:#FFFBF0 !important}
+.new-val{font-weight:700;color:#1A1A1A}
+.ai-tag{background:#FEF3C7;color:#92400E;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px}
+.edit-field{border:1.5px solid #DC2626;border-radius:4px;padding:4px 7px;font-size:13px;font-weight:700;color:#1A1A1A;background:#FEF3C7;width:120px}
+.unchanged{color:#7F95A0;font-style:italic;font-size:12px}
+
+/* SCREEN 4 - IMPACT */
+.s4-header{padding:14px 24px;background:#fff;border-bottom:1px solid #D5E2E6;flex-shrink:0}
+.s4-body{flex:1;overflow-y:auto;padding:20px 24px}
+.impact-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px}
+.impact-card{background:#fff;border:1px solid #D5E2E6;border-radius:8px;padding:16px}
+.ic-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ic-name{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px}
+.ic-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.ic-count{font-size:24px;font-weight:800;color:#1A1A1A;margin-bottom:2px}
+.ic-detail{font-size:11px;color:#5E7480;line-height:1.5}.ic-detail b{color:#22343C}
+.ic-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:100px}
+.ic-first{background:#E3ECEF;color:#0B4A5B}
+.ic-third{background:#E0F0FA;color:#1A4A6A}
+.ic-warn{background:#FEE2E2;color:#991B1B}
+.irreversible-banner{background:#FEE2E2;border:1px solid #FCA5A5;border-radius:8px;padding:14px 16px;margin-bottom:20px;display:flex;gap:10px}
+.irr-text{font-size:12px;color:#991B1B;line-height:1.6}.irr-text b{font-weight:700}
+.section-label2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#7F95A0;margin-bottom:10px}
+
+/* SCREEN 5 - CONFIRM */
+.s5-header{padding:14px 24px;background:#fff;border-bottom:1px solid #D5E2E6;flex-shrink:0}
+.s5-body{flex:1;overflow-y:auto;padding:20px 24px}
+.summary-strip{background:#E6F2F5;border:1px solid #D8C8E2;border-radius:8px;padding:14px 20px;display:flex;gap:32px;margin-bottom:20px}
+.ss-item{display:flex;flex-direction:column;gap:3px}
+.ss-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:#7F95A0}
+.ss-value{font-size:20px;font-weight:800;color:#0F5F73}
+.date-section{background:#fff;border:1px solid #D5E2E6;border-radius:8px;padding:16px;margin-bottom:20px}
+.date-label{font-size:13px;font-weight:700;margin-bottom:10px}
+.date-options{display:flex;gap:10px;flex-wrap:wrap}
+.date-opt{padding:8px 14px;border:1.5px solid #D5E2E6;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:#22343C;background:#fff}
+.date-opt.active-date{border-color:#0F5F73;background:#E6F2F5;color:#0F5F73}
+.date-note{font-size:11px;color:#5E7480;margin-top:8px;padding:7px 10px;background:#F4F8F9;border-radius:5px}
+.diff-table-wrap{background:#fff;border:1px solid #D5E2E6;border-radius:8px;overflow:hidden;margin-bottom:20px}
+.old-val{color:#7F95A0;text-decoration:line-through;font-size:12px}
+.arrow-cell{color:#B5C7CE;font-size:16px;text-align:center}
+.new-val-diff{color:#1A7A4A;font-weight:700}
+.confirm-section{background:#fff;border:1.5px solid #D5E2E6;border-radius:8px;padding:16px;margin-bottom:20px}
+.confirm-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.confirm-text{font-size:13px;color:#22343C;line-height:1.5}.confirm-text b{font-weight:700}
+.confirm-irr{border-top:1px solid #FCA5A5;padding-top:10px;margin-top:10px}
+
+/* SUCCESS */
+.success-screen{display:none;flex-direction:column;align-items:center;justify-content:center;height:calc(100vh - 96px);gap:20px;background:#F4F8F9}
+.success-screen.active{display:flex}
+.success-icon{width:64px;height:64px;background:#1A7A4A;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff}
+.success-title{font-size:22px;font-weight:800;color:#1A1A1A}
+.success-sub{font-size:14px;color:#5E7480;text-align:center;max-width:420px;line-height:1.6}
+.success-pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.success-pill{background:#E6F4ED;color:#1A5A3A;font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px}
+
+.z-wrap{padding:32px 40px;overflow:auto;max-width:1100px;margin:0 auto;width:100%}
+.z-h{font-size:22px;font-weight:800;color:#0A3340}.z-sub{font-size:13px;color:#5E7480;margin:4px 0 22px}
+.z-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.z-card{background:#fff;border:1px solid #D5E2E6;border-radius:12px;padding:18px}
+.z-card h3{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;margin-bottom:12px}
+.z-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #E9F0F2;font-size:13px;cursor:pointer}
+.z-row:first-of-type{border-top:none}.z-row small{color:#7F95A0;font-size:11px}
+.z-pill{font-size:11px;padding:2px 8px;border-radius:100px;background:#E6F2F5;color:#0F5F73;font-weight:600}
+.z-pill.d{background:#FEF3C7;color:#92400E}.z-pill.ok{background:#E6F4ED;color:#1A5A3A}
+.z-cta{background:#0F5F73;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:13px}
+.z-path{font-size:12px;color:#5E7480;background:#E6F2F5;border-radius:8px;padding:8px 12px;margin-bottom:20px;display:inline-block}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="7" fill="#0F5F73"/><path d="M5 15c3-5 5 5 8 0s5 5 8 0" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg><span>Tidewell</span></div>
+  <div class="breadcrumb">People › <b>Bulk Change</b> › Performance Cycle Q4 2025</div>
+  <div class="change-label">⚡ Bulk Change</div>
+</div>
+
+<!-- STEPS -->
+<div class="steps" id="steps-bar" style="display:none">
+  <div class="step active" id="s-1"><div class="sn">1</div>Select Employees</div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="s-2"><div class="sn">2</div>Select Attributes</div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="s-3"><div class="sn">3</div>Input Values</div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="s-4"><div class="sn">4</div>Review Impact</div>
+  <div class="step-arrow">›</div>
+  <div class="step" id="s-5"><div class="sn">5</div>Confirm & Schedule</div>
+</div>
+
+<!-- ===== SCREEN 1: SELECT EMPLOYEES ===== -->
+<div class="screen active" id="screen-0" style="height:calc(100vh - 52px)"><div class="z-wrap">
+  <div class="z-path">People › <b>Bulk Change</b> (also reachable from any filtered employee list via “Select all → Bulk edit”)</div>
+  <div style="display:flex;justify-content:space-between;align-items:center"><div><div class="z-h">Bulk Change</div><div class="z-sub">Change attributes for many employees at once. Preview effects on every connected system before anything is committed.</div></div><button class="z-cta" onclick="goTo(1)">+ New bulk change</button></div>
+  <div class="z-grid">
+    <div class="z-card"><h3>Start from a template</h3>
+      <div class="z-row" onclick="goTo(1)"><span>Performance cycle<br><small>Salary + Title + Level · different value per employee</small></span><span class="z-pill">Use</span></div>
+      <div class="z-row" onclick="goTo(1)"><span>Re-org<br><small>Department + Manager + Title</small></span><span class="z-pill">Use</span></div>
+      <div class="z-row" onclick="goTo(1)"><span>Office change<br><small>Location + Office + Time zone</small></span><span class="z-pill">Use</span></div></div>
+    <div class="z-card"><h3>Drafts</h3>
+      <div class="z-row" onclick="goTo(1)"><span>Q4 performance cycle<br><small>47 employees · saved yesterday</small></span><span class="z-pill d">Draft</span></div>
+      <div class="z-row" onclick="goTo(1)"><span>Austin office consolidation<br><small>12 employees · saved 3 days ago</small></span><span class="z-pill d">Draft</span></div></div>
+    <div class="z-card" style="grid-column:span 2"><h3>Recent bulk changes</h3>
+      <div class="z-row"><span>Engineering re-org<br><small>112 employees · Department, Manager</small></span><span class="z-pill ok">Completed</span></div>
+      <div class="z-row"><span>New-hire cohort setup<br><small>24 employees · Devices, SSO groups</small></span><span class="z-pill ok">Completed</span></div>
+      <div class="z-row"><span>Mid-year comp adjustments<br><small>9 employees · Base salary</small></span><span class="z-pill">Scheduled · Dec 1</span></div></div>
+  </div></div></div>
+<div class="screen" id="screen-1">
+  <div class="s1-layout">
+    <div class="filter-panel">
+      <div class="fp-title">Filter employees by</div>
+      <div class="fg"><div class="fl">Department</div>
+        <select class="fs"><option>Engineering, Product</option></select>
+        <div class="tags"><span class="tag">Engineering</span><span class="tag">Product</span></div>
+      </div>
+      <div class="fg"><div class="fl">Manager</div><select class="fs"><option>All managers</option></select></div>
+      <div class="fg"><div class="fl">Work Location</div>
+        <select class="fs"><option>San Francisco, CA</option></select>
+        <div class="tags"><span class="tag">San Francisco</span></div>
+      </div>
+      <div class="fg"><div class="fl">Employment Type</div><select class="fs"><option>Full-time</option></select></div>
+      <hr class="fp-divider">
+      <div class="fg"><div class="fl">Or import a list</div>
+        <div class="upload-zone">↑ Upload CSV of employees</div>
+        <div style="font-size:11px;color:#7F95A0;margin-top:5px">Match by employee ID or email</div>
+      </div>
+    </div>
+    <div class="table-area">
+      <div class="table-header">
+        <div class="th-left"><span class="th-title">Employees</span><span class="count-badge">47 selected</span><span style="font-size:11px;color:#7F95A0;margin-left:8px">Tip: For 1,000+ employees, use CSV import on the next screen</span></div>
+        <input class="search-input" placeholder="Search name or email…">
+      </div>
+      <div class="select-bar">✓ 47 employees selected · <span style="color:#22343C">Showing 7 of 47</span> · <a>Select all 47</a> · <a style="color:#7F95A0;margin-left:8px">Export list</a></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th style="width:36px"><input type="checkbox" checked></th><th>Employee</th><th>Department</th><th>Title</th><th>Location</th><th>Manager</th><th>Current Comp</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td><input type="checkbox" checked></td><td><span class="av" style="background:#0F5F73">AK</span><span class="emp-name">Aisha Kumar</span></td><td><span class="pill pill-p">Engineering</span></td><td>Senior Engineer</td><td><span class="pill pill-l">SF</span></td><td>Sarah Chen</td><td>$152,000</td></tr>
+            <tr class="sel"><td><input type="checkbox" checked></td><td><span class="av" style="background:#1A5A8A">JM</span><span class="emp-name">James Morton</span></td><td><span class="pill pill-p">Product</span></td><td>Product Manager</td><td><span class="pill pill-l">SF</span></td><td>Marcus Lee</td><td>$138,000</td></tr>
+            <tr class="sel"><td><input type="checkbox" checked></td><td><span class="av" style="background:#1A7A4A">PR</span><span class="emp-name">Priya Rajan</span></td><td><span class="pill pill-p">Engineering</span></td><td>Staff Engineer</td><td><span class="pill pill-l">SF</span></td><td>Sarah Chen</td><td>$178,000</td></tr>
+            <tr class="sel"><td><input type="checkbox" checked></td><td><span class="av" style="background:#8A5A1A">DW</span><span class="emp-name">Derek Walsh</span></td><td><span class="pill pill-p">Product</span></td><td>Senior PM</td><td><span class="pill pill-l">SF</span></td><td>Marcus Lee</td><td>$145,000</td></tr>
+            <tr class="sel"><td><input type="checkbox" checked></td><td><span class="av" style="background:#5A1A8A">NL</span><span class="emp-name">Nina Lopez</span></td><td><span class="pill pill-p">Engineering</span></td><td>Eng Manager</td><td><span class="pill pill-l">SF</span></td><td>Sarah Chen</td><td>$195,000</td></tr>
+            <tr style="opacity:0.75;background:#FFFBF0"><td><input type="checkbox" disabled></td><td><span class="av" style="background:#7A3A1A">TC</span><span class="emp-name">Tom Chen</span><span title="Marcus Lee is editing this employee in another bulk change" style="background:#FEF3C7;color:#92400E;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:8px;cursor:help">🔒 In use</span></td><td><span class="pill pill-p">Engineering</span></td><td>Engineer II</td><td><span class="pill pill-l">SF</span></td><td>Nina Lopez</td><td>$128,000</td></tr>
+            <tr><td><input type="checkbox"></td><td><span class="av" style="background:#1A6A7A">SW</span><span class="emp-name">Sara Williams</span></td><td><span class="pill pill-p">Product</span></td><td>Associate PM</td><td><span class="pill pill-l">SF</span></td><td>Marcus Lee</td><td>$118,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="footer">
+        <div class="footer-info"><b>47 employees</b> selected · Engineering & Product · San Francisco</div>
+        <div class="btn-row"><button class="btn-sec">Cancel</button><button class="btn-pri" onclick="goTo(2)">Continue with 47 employees →</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 2: SELECT ATTRIBUTES ===== -->
+<div class="screen" id="screen-2">
+  <div class="attr-header">
+    <div class="attr-header-title">Select attributes to change</div>
+    <div class="attr-header-sub">Choose from 300+ attributes · Use templates for common changes or search and browse by category</div>
+  </div>
+  <div class="s2-layout">
+    <div class="attr-main">
+
+      <!-- Templates -->
+      <div class="template-section">
+        <div class="section-label">Quick-start templates <span style="font-size:10px;font-weight:500;color:#B0A0BA;text-transform:none;letter-spacing:0">— additive, select one or more</span></div>
+        <div class="template-grid">
+          <div class="template-card" id="tpl-perf" onclick="toggleTemplate('perf')">
+            <div class="tpl-check">✓</div>
+            <div class="tpl-icon">📊</div>
+            <div class="tpl-name">Performance Cycle</div>
+            <div class="tpl-attrs">Compensation · Title · Level</div>
+          </div>
+          <div class="template-card" id="tpl-reorg" onclick="toggleTemplate('reorg')">
+            <div class="tpl-check">✓</div>
+            <div class="tpl-icon">🏢</div>
+            <div class="tpl-name">Re-org</div>
+            <div class="tpl-attrs">Department · Manager · Title</div>
+          </div>
+          <div class="template-card" id="tpl-office" onclick="toggleTemplate('office')">
+            <div class="tpl-check">✓</div>
+            <div class="tpl-icon">📍</div>
+            <div class="tpl-name">New Office</div>
+            <div class="tpl-attrs">Work Location · Office Assignment · Time Zone</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <input class="attr-search" id="attr-search-input" placeholder="Search 300+ attributes… e.g. 'comp', 'manager', 'equity'" oninput="filterAttrs(this.value)">
+
+      <!-- Categories -->
+      <div class="cat-section" id="cat-section">
+
+        <div class="cat-item open" id="cat-comp">
+          <div class="cat-header" onclick="toggleCat('cat-comp')">
+            <div class="cat-left"><span class="cat-icon">💰</span><span class="cat-name">Compensation</span></div>
+            <div class="cat-right"><span class="cat-count">12 attributes</span><span class="cat-selected-count" id="sel-comp">0 selected</span><span class="cat-arrow">›</span></div>
+          </div>
+          <div class="cat-body">
+            <div class="attr-row" id="ar-Base Salary" onclick="toggleAttr('Base Salary','Compensation')"><input type="checkbox" id="cb-Base Salary"><span class="attr-name">Base Salary</span><span class="attr-desc">Annual base compensation</span></div>
+            <div class="attr-row" id="ar-OTE" onclick="toggleAttr('OTE','Compensation')"><input type="checkbox" id="cb-OTE"><span class="attr-name">OTE (On-Target Earnings)</span><span class="attr-desc">Total target comp incl. variable</span></div>
+            <div class="attr-row" id="ar-Equity" onclick="toggleAttr('Equity','Compensation')"><input type="checkbox" id="cb-Equity"><span class="attr-name">Equity / RSU Grant</span><span class="attr-desc">Stock grant amount</span></div>
+            <div class="attr-row" id="ar-Bonus Target" onclick="toggleAttr('Bonus Target','Compensation')"><input type="checkbox" id="cb-Bonus Target"><span class="attr-name">Bonus Target %</span><span class="attr-desc">Target bonus as % of base</span></div>
+            <div class="attr-row" id="ar-Pay Frequency" onclick="toggleAttr('Pay Frequency','Compensation')"><input type="checkbox" id="cb-Pay Frequency"><span class="attr-name">Pay Frequency</span><span class="attr-desc">Bi-weekly, monthly, etc.</span></div>
+          </div>
+        </div>
+
+        <div class="cat-item" id="cat-emp">
+          <div class="cat-header" onclick="toggleCat('cat-emp')">
+            <div class="cat-left"><span class="cat-icon">👤</span><span class="cat-name">Employment Info</span></div>
+            <div class="cat-right"><span class="cat-count">28 attributes</span><span class="cat-selected-count" id="sel-emp">0 selected</span><span class="cat-arrow">›</span></div>
+          </div>
+          <div class="cat-body">
+            <div class="attr-row" id="ar-Title" onclick="toggleAttr('Title','Employment Info')"><input type="checkbox" id="cb-Title"><span class="attr-name">Title</span><span class="attr-desc">Job title / position</span></div>
+            <div class="attr-row" id="ar-Level" onclick="toggleAttr('Level','Employment Info')"><input type="checkbox" id="cb-Level"><span class="attr-name">Level</span><span class="attr-desc">Career level (L3, L4, Senior...)</span></div>
+            <div class="attr-row" id="ar-Department" onclick="toggleAttr('Department','Employment Info')"><input type="checkbox" id="cb-Department"><span class="attr-name">Department</span><span class="attr-desc">Organizational department</span></div>
+            <div class="attr-row" id="ar-Manager" onclick="toggleAttr('Manager','Employment Info')"><input type="checkbox" id="cb-Manager"><span class="attr-name">Manager</span><span class="attr-desc">Direct reporting manager</span></div>
+            <div class="attr-row" id="ar-Employment Type" onclick="toggleAttr('Employment Type','Employment Info')"><input type="checkbox" id="cb-Employment Type"><span class="attr-name">Employment Type</span><span class="attr-desc">Full-time, part-time, contractor</span></div>
+            <div class="attr-row" id="ar-Cost Center" onclick="toggleAttr('Cost Center','Employment Info')"><input type="checkbox" id="cb-Cost Center"><span class="attr-name">Cost Center</span><span class="attr-desc">Finance cost center code</span></div>
+          </div>
+        </div>
+
+        <div class="cat-item" id="cat-loc">
+          <div class="cat-header" onclick="toggleCat('cat-loc')">
+            <div class="cat-left"><span class="cat-icon">📍</span><span class="cat-name">Work Location</span></div>
+            <div class="cat-right"><span class="cat-count">8 attributes</span><span class="cat-selected-count" id="sel-loc">0 selected</span><span class="cat-arrow">›</span></div>
+          </div>
+          <div class="cat-body">
+            <div class="attr-row" id="ar-Work Location" onclick="toggleAttr('Work Location','Work Location')"><input type="checkbox" id="cb-Work Location"><span class="attr-name">Work Location</span><span class="attr-desc">Primary office or remote</span></div>
+            <div class="attr-row" id="ar-Office Assignment" onclick="toggleAttr('Office Assignment','Work Location')"><input type="checkbox" id="cb-Office Assignment"><span class="attr-name">Office Assignment</span><span class="attr-desc">Specific office / floor / desk</span></div>
+            <div class="attr-row" id="ar-Time Zone" onclick="toggleAttr('Time Zone','Work Location')"><input type="checkbox" id="cb-Time Zone"><span class="attr-name">Time Zone</span><span class="attr-desc">Working time zone</span></div>
+            <div class="attr-row" id="ar-Remote Status" onclick="toggleAttr('Remote Status','Work Location')"><input type="checkbox" id="cb-Remote Status"><span class="attr-name">Remote Status</span><span class="attr-desc">On-site, hybrid, or remote</span></div>
+          </div>
+        </div>
+
+        <div class="cat-item" id="cat-ben">
+          <div class="cat-header" onclick="toggleCat('cat-ben')">
+            <div class="cat-left"><span class="cat-icon">🏥</span><span class="cat-name">Benefits</span></div>
+            <div class="cat-right"><span class="cat-count">18 attributes</span><span class="cat-selected-count" id="sel-ben">0 selected</span><span class="cat-arrow">›</span></div>
+          </div>
+          <div class="cat-body">
+            <div class="attr-row" id="ar-Health Plan" onclick="toggleAttr('Health Plan','Benefits')"><input type="checkbox" id="cb-Health Plan"><span class="attr-name">Health Plan</span><span class="attr-desc">Medical insurance tier</span></div>
+            <div class="attr-row" id="ar-HSA Contribution" onclick="toggleAttr('HSA Contribution','Benefits')"><input type="checkbox" id="cb-HSA Contribution"><span class="attr-name">HSA Contribution</span><span class="attr-desc">Employer HSA contribution</span></div>
+            <div class="attr-row" id="ar-401k Match" onclick="toggleAttr('401k Match','Benefits')"><input type="checkbox" id="cb-401k Match"><span class="attr-name">401k Match %</span><span class="attr-desc">Employer match percentage</span></div>
+            <div class="attr-row" id="ar-Commuter Benefit" onclick="toggleAttr('Commuter Benefit','Benefits')"><input type="checkbox" id="cb-Commuter Benefit"><span class="attr-name">Commuter Benefit</span><span class="attr-desc">Monthly commuter allowance</span></div>
+          </div>
+        </div>
+
+        <div class="cat-item" id="cat-it">
+          <div class="cat-header" onclick="toggleCat('cat-it')">
+            <div class="cat-left"><span class="cat-icon">💻</span><span class="cat-name">IT & Access</span></div>
+            <div class="cat-right"><span class="cat-count">22 attributes</span><span class="cat-selected-count" id="sel-it">0 selected</span><span class="cat-arrow">›</span></div>
+          </div>
+          <div class="cat-body">
+            <div class="attr-row" id="ar-Device" onclick="toggleAttr('Device','IT & Access')"><input type="checkbox" id="cb-Device"><span class="attr-name">Device Assignment</span><span class="attr-desc">Assigned laptop / hardware</span></div>
+            <div class="attr-row" id="ar-SSO Groups" onclick="toggleAttr('SSO Groups','IT & Access')"><input type="checkbox" id="cb-SSO Groups"><span class="attr-name">SSO Groups</span><span class="attr-desc">Single sign-on group membership</span></div>
+            <div class="attr-row" id="ar-GitHub Teams" onclick="toggleAttr('GitHub Teams','IT & Access')"><input type="checkbox" id="cb-GitHub Teams"><span class="attr-name">GitHub Teams</span><span class="attr-desc">GitHub org team membership</span></div>
+            <div class="attr-row" id="ar-Slack Channels" onclick="toggleAttr('Slack Channels','IT & Access')"><input type="checkbox" id="cb-Slack Channels"><span class="attr-name">Slack Channels</span><span class="attr-desc">Slack channel memberships</span></div>
+          </div>
+        </div>
+
+        <div class="cat-item" id="cat-to">
+          <div class="cat-header" onclick="toggleCat('cat-to')">
+            <div class="cat-left"><span class="cat-icon">⏱</span><span class="cat-name">Time Off</span></div>
+            <div class="cat-right"><span class="cat-count">6 attributes</span><span class="cat-selected-count" id="sel-to">0 selected</span><span class="cat-arrow">›</span></div>
+          </div>
+          <div class="cat-body">
+            <div class="attr-row" id="ar-PTO Policy" onclick="toggleAttr('PTO Policy','Time Off')"><input type="checkbox" id="cb-PTO Policy"><span class="attr-name">PTO Policy</span><span class="attr-desc">Vacation / time off policy</span></div>
+            <div class="attr-row" id="ar-Accrual Rate" onclick="toggleAttr('Accrual Rate','Time Off')"><input type="checkbox" id="cb-Accrual Rate"><span class="attr-name">Accrual Rate</span><span class="attr-desc">Days accrued per month</span></div>
+          </div>
+        </div>
+
+        <div class="cat-item" id="cat-custom">
+          <div class="cat-header" onclick="toggleCat('cat-custom')">
+            <div class="cat-left"><span class="cat-icon">⚙️</span><span class="cat-name">Custom Attributes</span></div>
+            <div class="cat-right"><span class="cat-count">47 attributes</span><span class="cat-selected-count" id="sel-custom">0 selected</span><span class="cat-arrow">›</span></div>
+          </div>
+          <div class="cat-body">
+            <div class="attr-row" id="ar-Badge Access Level" onclick="toggleAttr('Badge Access Level','Custom')"><input type="checkbox" id="cb-Badge Access Level"><span class="attr-name">Badge Access Level</span><span class="attr-desc">Physical access tier</span></div>
+            <div class="attr-row" id="ar-Performance Rating" onclick="toggleAttr('Performance Rating','Custom')"><input type="checkbox" id="cb-Performance Rating"><span class="attr-name">Performance Rating</span><span class="attr-desc">Annual performance score</span></div>
+            <div class="attr-row" id="ar-Fleet Vehicle" onclick="toggleAttr('Fleet Vehicle','Custom')"><input type="checkbox" id="cb-Fleet Vehicle"><span class="attr-name">Fleet Vehicle</span><span class="attr-desc">Company vehicle assignment</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="selected-panel">
+      <div class="sp-header">
+        <span class="sp-title">Selected attributes</span>
+        <span class="sp-count" id="sp-count">0</span>
+      </div>
+      <div class="sp-body" id="sp-body">
+        <div class="sp-empty" id="sp-empty">No attributes selected yet.<br><br>Use templates above or browse categories to add attributes.</div>
+      </div>
+      <div class="sp-footer">
+        <button class="sp-clear" onclick="clearAll()">Clear all</button>
+        <button class="sp-cta" id="sp-cta" onclick="goTo(3)" disabled>Continue →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 3: INPUT VALUES ===== -->
+<div class="screen" id="screen-3">
+  <div class="s3-header">
+    <div><div class="s3-title">Set new values for 47 employees</div><div class="s3-subtitle">Performance Cycle Q4 2025 · Compensation & Title changes</div></div>
+    <button class="import-btn" id="ai-import-btn" onclick="toggleMappingPanel()" style="background:#0F5F73;color:#fff;border-color:#0F5F73;font-size:13px;padding:8px 16px">✦ AI-powered import <span style="font-size:10px;background:#fff;color:#0F5F73;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:800">NEW</span></button>
+  </div>
+  <div style="background:#E3ECEF;border-bottom:1px solid #D4C0E0;padding:9px 24px;display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <span style="font-size:13px">💡</span>
+      <span style="font-size:12px;color:#0A3340"><b>Working with many employees?</b> Import a spreadsheet to set values faster and reduce manual entry errors. <a style="color:#0F5F73;font-weight:700;cursor:pointer">Download template →</a></span>
+    </div>
+<div id="ai-mapping-panel" style="display:none;background:#fff;border-bottom:1.5px solid #0F5F73;flex-shrink:0">
+  <div style="padding:16px 24px 0">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <div style="background:#E6F2F5;color:#0F5F73;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px">AI MAPPING PREVIEW</div>
+      <span style="font-size:12px;color:#5E7480">AI detected your file format and mapped columns automatically. Review before importing.</span>
+    </div>
+    <div style="background:#F4F8F9;border:1px solid #D5E2E6;border-radius:8px;overflow:hidden;margin-bottom:14px">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="background:#E9F0F2">
+            <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #D5E2E6">Source column</th>
+            <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #D5E2E6">Tidewell field</th>
+            <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #D5E2E6">Confidence</th>
+            <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #D5E2E6">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #E9F0F2">
+            <td style="padding:9px 14px;font-size:12px;color:#22343C;font-family:monospace">"New Base Salary"</td>
+            <td style="padding:9px 14px;font-size:12px;font-weight:600;color:#1A1A1A">Compensation</td>
+            <td style="padding:9px 14px"><div style="display:flex;align-items:center;gap:4px"><div style="height:4px;width:48px;background:#D5E2E6;border-radius:2px"><div style="height:4px;width:46px;background:#1A7A4A;border-radius:2px"></div></div><span style="font-size:11px;color:#1A7A4A">98%</span></div></td>
+            <td style="padding:9px 14px"><span style="background:#E6F4ED;color:#1A5A3A;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px">Auto-mapped</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid #E9F0F2">
+            <td style="padding:9px 14px;font-size:12px;color:#22343C;font-family:monospace">"Employee Full Name"</td>
+            <td style="padding:9px 14px;font-size:12px;font-weight:600;color:#1A1A1A">Employee</td>
+            <td style="padding:9px 14px"><div style="display:flex;align-items:center;gap:4px"><div style="height:4px;width:48px;background:#D5E2E6;border-radius:2px"><div style="height:4px;width:45px;background:#1A7A4A;border-radius:2px"></div></div><span style="font-size:11px;color:#1A7A4A">95%</span></div></td>
+            <td style="padding:9px 14px"><span style="background:#E6F4ED;color:#1A5A3A;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px">Auto-mapped</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid #E9F0F2">
+            <td style="padding:9px 14px;font-size:12px;color:#22343C;font-family:monospace">"Mgr Name"</td>
+            <td style="padding:9px 14px;font-size:12px;font-weight:600;color:#1A1A1A">Manager</td>
+            <td style="padding:9px 14px"><div style="display:flex;align-items:center;gap:4px"><div style="height:4px;width:48px;background:#D5E2E6;border-radius:2px"><div style="height:4px;width:38px;background:#1A7A4A;border-radius:2px"></div></div><span style="font-size:11px;color:#1A7A4A">80%</span></div></td>
+            <td style="padding:9px 14px"><span style="background:#E6F4ED;color:#1A5A3A;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px">Auto-mapped</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid #E9F0F2">
+            <td style="padding:9px 14px;font-size:12px;color:#22343C;font-family:monospace">"New Title/Role"</td>
+            <td style="padding:9px 14px;font-size:12px;font-weight:600;color:#1A1A1A">Title</td>
+            <td style="padding:9px 14px"><div style="display:flex;align-items:center;gap:4px"><div style="height:4px;width:48px;background:#D5E2E6;border-radius:2px"><div style="height:4px;width:32px;background:#D97706;border-radius:2px"></div></div><span style="font-size:11px;color:#D97706">65%</span></div></td>
+            <td style="padding:9px 14px"><span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px">Review mapping</span></td>
+          </tr>
+          <tr>
+            <td style="padding:9px 14px;font-size:12px;color:#22343C;font-family:monospace">"Review Score"</td>
+            <td style="padding:9px 14px;font-size:12px;color:#7F95A0;font-style:italic">No match found</td>
+            <td style="padding:9px 14px"><div style="display:flex;align-items:center;gap:4px"><div style="height:4px;width:48px;background:#D5E2E6;border-radius:2px"><div style="height:4px;width:4px;background:#7F95A0;border-radius:2px"></div></div><span style="font-size:11px;color:#7F95A0">—</span></div></td>
+            <td style="padding:9px 14px"><span style="background:#F4F8F9;color:#7F95A0;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid #D5E2E6">Skip column</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px">
+      <span style="font-size:12px;color:#5E7480">4 columns mapped · 1 needs review · 1 skipped · 47 employee rows detected</span>
+      <div style="display:flex;gap:8px">
+        <button onclick="toggleMappingPanel()" style="padding:7px 14px;border:1px solid #D5E2E6;border-radius:6px;background:#fff;color:#22343C;font-size:12px;font-weight:600;cursor:pointer">Cancel</button>
+        <button onclick="confirmMapping()" style="padding:7px 14px;border:none;border-radius:6px;background:#0F5F73;color:#fff;font-size:12px;font-weight:600;cursor:pointer">Confirm mapping and import</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="s3-body">
+    <div class="warn-banner" id="warn-banner">
+      <div style="font-size:18px">⚠️</div>
+      <div class="warn-text" id="warn-text"><b>2 issues detected</b> — Row 3: Priya Rajan's compensation of <span id="warn-entered-val">$19,800</span> is outside the allowed range of <b>$178,000–$220,000</b> (validation error). Row 4: Derek Walsh's compensation is decreasing by 40% (AI anomaly). Please review before continuing.</div>
+    </div>
+    <div class="val-table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Employee</th><th>Current Comp</th><th>New Comp</th><th>Current Title</th><th>New Title</th></tr></thead>
+        <tbody>
+          <tr><td style="color:#7F95A0;font-size:12px">1</td><td><span class="av" style="background:#0F5F73">AK</span><span class="emp-name">Aisha Kumar</span></td><td style="color:#7F95A0">$152,000</td><td><span class="new-val">$162,000</span></td><td style="color:#7F95A0">Senior Engineer</td><td><span class="new-val">Staff Engineer</span></td></tr>
+          <tr><td style="color:#7F95A0;font-size:12px">2</td><td><span class="av" style="background:#1A5A8A">JM</span><span class="emp-name">James Morton</span></td><td style="color:#7F95A0">$138,000</td><td><span class="new-val">$148,000</span></td><td style="color:#7F95A0">Product Manager</td><td><span class="unchanged">— no change —</span></td></tr>
+          <tr id="priya-row" style="border-bottom:1px solid #FCA5A5;background:#FFF8F8"><td style="color:#7F95A0;font-size:12px">3</td><td><span class="av" style="background:#1A7A4A">PR</span><span class="emp-name">Priya Rajan</span></td><td style="color:#7F95A0">$178,000</td><td><div style="display:flex;align-items:center;gap:6px"><span id="priya-warn-icon" style="color:#DC2626;font-size:15px">⚠</span><input id="priya-field" style="border:1.5px solid #DC2626;border-radius:4px;padding:4px 8px;font-size:13px;font-weight:700;color:#1A1A1A;background:#FFF0F0;width:120px" value="$19,800" oninput="checkPriyaValue(this.value)"><span id="priya-ok-icon" style="display:none;color:#1A7A4A;font-size:16px;font-weight:800">✓</span><span id="priya-error-tag" style="background:#FEE2E2;color:#DC2626;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px">Input Error</span></div><div id="priya-error-msg" style="font-size:11px;color:#DC2626;margin-top:5px;line-height:1.5">Value outside allowed range for this role — must be between <b>$178,000</b> and <b>$220,000</b>.</div></td><td style="color:#7F95A0">Staff Engineer</td><td><span class="new-val">Principal Engineer</span></td></tr>
+          <tr id="derek-row" style="background:#FFFDF5;border-bottom:1px solid #FCD34D">
+      <td style="color:#7F95A0;font-size:12px">4</td>
+      <td><span class="av" style="background:#8A5A1A">DW</span><span class="emp-name">Derek Walsh</span></td>
+      <td style="color:#7F95A0">$145,000</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="color:#D97706;font-size:14px">◆</span>
+          <span style="font-weight:700;color:#1A1A1A">$87,000</span>
+          <span style="background:#FEF3C7;color:#92400E;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px">AI anomaly</span>
+        </div>
+        <div style="font-size:11px;color:#92400E;margin-top:4px">Compensation decreasing by 40% — unusual for this role. Confirm this is intentional.</div>
+      </td>
+      <td style="color:#7F95A0">Senior PM</td>
+      <td><span class="new-val">Principal PM</span></td>
+    </tr>
+          <tr><td style="color:#7F95A0;font-size:12px">5</td><td><span class="av" style="background:#5A1A8A">NL</span><span class="emp-name">Nina Lopez</span></td><td style="color:#7F95A0">$195,000</td><td><span class="new-val">$210,000</span></td><td style="color:#7F95A0">Eng Manager</td><td><span class="unchanged">— no change —</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:12px;color:#7F95A0;margin-top:10px;text-align:center">Showing 5 of 47 · <a style="color:#0F5F73;cursor:pointer;font-weight:600">View all</a></div>
+  </div>
+  <div class="footer">
+    <div class="footer-info"><b>1 anomaly</b> flagged · Resolve before continuing</div>
+    <div class="btn-row"><button class="btn-sec" onclick="goTo(2)">← Back</button><button class="btn-pri" onclick="goTo(4)">Review downstream impact →</button></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 4: REVIEW IMPACT ===== -->
+<div class="screen" id="screen-4">
+  <div class="s4-header">
+    <div style="font-size:15px;font-weight:700">Review downstream impact</div>
+    <div style="font-size:12px;color:#5E7480;margin-top:3px">These systems update automatically when you commit. Some changes cannot be reversed.</div>
+  </div>
+  <div class="s4-body">
+    <div class="irreversible-banner">
+      <div style="font-size:18px">🔴</div>
+      <div class="irr-text"><b>2 integrations cannot be automatically reversed.</b> Changes to Slack and GitHub apply immediately. Tidewell cannot roll these back — you would need to make changes manually in each platform.</div>
+    </div>
+    <div class="section-label2">Tidewell products</div>
+    <div class="impact-grid">
+      <div class="impact-card"><div class="ic-header"><div class="ic-name"><div class="ic-icon" style="background:#E6F2F5">💰</div>Payroll</div><span class="ic-tag ic-first">First-party</span></div><div class="ic-count">47</div><div class="ic-detail">employees will have updated compensation on the <b>July 15 payroll cycle</b>.</div></div>
+      <div class="impact-card"><div class="ic-header"><div class="ic-name"><div class="ic-icon" style="background:#E6F4ED">🏥</div>Benefits</div><span class="ic-tag ic-first">First-party</span></div><div class="ic-count">3</div><div class="ic-detail">employees will have <b>benefits eligibility recalculated</b> due to comp crossing plan thresholds.</div></div>
+      <div class="impact-card"><div class="ic-header"><div class="ic-name"><div class="ic-icon" style="background:#FEF3C7">⏱</div>Time Off</div><span class="ic-tag ic-first">First-party</span></div><div class="ic-count">12</div><div class="ic-detail">employees will have <b>updated PTO accrual rates</b> based on new title levels.</div></div>
+    </div>
+    <div class="section-label2">Third-party integrations</div>
+    <div class="impact-grid">
+      <div class="impact-card" style="border-color:#FCA5A5"><div class="ic-header"><div class="ic-name"><div class="ic-icon" style="background:#FEE2E2">💬</div>Slack</div><span class="ic-tag ic-warn">⚠ Irreversible</span></div><div class="ic-count" style="color:#DC2626">9</div><div class="ic-detail">channel memberships will update. <b>Cannot be reversed by Tidewell.</b></div></div>
+      <div class="impact-card" style="border-color:#FCA5A5"><div class="ic-header"><div class="ic-name"><div class="ic-icon" style="background:#FEE2E2">🐙</div>GitHub</div><span class="ic-tag ic-warn">⚠ Irreversible</span></div><div class="ic-count" style="color:#DC2626">5</div><div class="ic-detail">team assignments will change. <b>Cannot be reversed by Tidewell.</b></div></div>
+      <div class="impact-card"><div class="ic-header"><div class="ic-name"><div class="ic-icon" style="background:#E0F0FA">📧</div>Google Workspace</div><span class="ic-tag ic-third">Third-party</span></div><div class="ic-count">6</div><div class="ic-detail">group memberships will update. Reversible via Google Admin.</div></div>
+    </div>
+        <div style="background:#E6F2F5;border:1.5px solid #0F5F73;border-radius:8px;padding:16px;margin-top:4px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <div style="background:#0F5F73;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px">AI COMPLIANCE INSIGHTS</div>
+            <span style="font-size:12px;color:#0B4A5B">2 compliance implications identified — review before committing</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="background:#fff;border:1px solid #B9D6DD;border-radius:6px;padding:12px 14px;display:flex;gap:10px">
+              <div style="flex-shrink:0;width:28px;height:28px;background:#E6F2F5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px">⚖</div>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:#0A3340;margin-bottom:3px">ACA reporting obligations may change</div>
+                <div style="font-size:11px;color:#0B4A5B;line-height:1.5">3 employees changing work location from California to Texas may trigger ACA reporting obligations in both states. Confirm with your compliance team before committing — filings may be required within 30 days of effective date.</div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #B9D6DD;border-radius:6px;padding:12px 14px;display:flex;gap:10px">
+              <div style="flex-shrink:0;width:28px;height:28px;background:#E6F2F5;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px">🏥</div>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:#0A3340;margin-bottom:3px">2 employees may lose health plan eligibility</div>
+                <div style="font-size:11px;color:#0B4A5B;line-height:1.5">Compensation increases crossing the $140,000 threshold may affect HSA contribution limits for 2 employees. Alternative plan assignments may be required before July 15 effective date to avoid coverage gaps.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+  </div>
+  <div class="footer">
+    <div class="footer-info">47 employees · <b>3 first-party</b> · <b>3 integrations</b> · <span style="color:#DC2626;font-weight:700">2 irreversible</span> · <span style="color:#0F5F73;font-weight:700">2 AI compliance flags</span></div>
+    <div class="btn-row"><button class="btn-sec" onclick="goTo(3)">← Back</button><button class="btn-pri" onclick="goTo(5)">Proceed to confirmation →</button></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN 5: CONFIRM & SCHEDULE ===== -->
+<div class="screen" id="screen-5">
+  <div style="background:#FEF3C7;border-bottom:1px solid #FCD34D;padding:9px 24px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <span style="font-size:14px">⚠️</span>
+      <span style="font-size:12px;color:#92400E"><b>1 employee was modified since you started this change.</b> Tom Chen's compensation was updated by Marcus Lee. <a style="color:#0F5F73;font-weight:700;cursor:pointer">Review conflict →</a></span>
+    </div>
+    <div class="s5-header">
+    <div style="font-size:15px;font-weight:700">Confirm & Schedule</div>
+    <div style="font-size:12px;color:#5E7480;margin-top:3px">Final review before committing. Changes propagate across your entire Tidewell platform.</div>
+  </div>
+  <div class="s5-body">
+    <div class="summary-strip">
+      <div class="ss-item"><div class="ss-label">Employees</div><div class="ss-value">47</div></div>
+      <div class="ss-item"><div class="ss-label">Attributes</div><div class="ss-value">2</div></div>
+      <div class="ss-item"><div class="ss-label">Systems affected</div><div class="ss-value">6</div></div>
+      <div class="ss-item"><div class="ss-label">Irreversible</div><div class="ss-value" style="color:#DC2626">2</div></div>
+    </div>
+    <div class="date-section">
+      <div class="date-label">📅 Effective date</div>
+      <div class="date-options">
+        <div class="date-opt">Immediately</div>
+        <div class="date-opt active-date">July 15, 2025 — Next payroll cycle</div>
+        <div class="date-opt">August 1, 2025</div>
+        <div class="date-opt">Custom date…</div>
+      </div>
+      <div class="date-note">⚡ July 15 aligns with your next payroll cycle. Compensation changes will reflect in that paycheck.</div>
+    </div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#7F95A0;margin-bottom:10px">Change summary — 5 of 47</div>
+    <div class="diff-table-wrap">
+      <table>
+        <thead><tr><th>Employee</th><th>Field</th><th>Current value</th><th style="text-align:center">→</th><th>New value</th></tr></thead>
+        <tbody>
+          <tr><td><span class="av" style="background:#0F5F73">AK</span><b>Aisha Kumar</b></td><td style="color:#5E7480;font-size:12px">Compensation</td><td><span class="old-val">$152,000</span></td><td class="arrow-cell">→</td><td><span class="new-val-diff">$162,000</span></td></tr>
+          <tr><td><span class="av" style="background:#0F5F73">AK</span><b>Aisha Kumar</b></td><td style="color:#5E7480;font-size:12px">Title</td><td><span class="old-val">Senior Engineer</span></td><td class="arrow-cell">→</td><td><span class="new-val-diff">Staff Engineer</span></td></tr>
+          <tr><td><span class="av" style="background:#1A5A8A">JM</span><b>James Morton</b></td><td style="color:#5E7480;font-size:12px">Compensation</td><td><span class="old-val">$138,000</span></td><td class="arrow-cell">→</td><td><span class="new-val-diff">$148,000</span></td></tr>
+          <tr><td><span class="av" style="background:#8A5A1A">DW</span><b>Derek Walsh</b></td><td style="color:#5E7480;font-size:12px">Compensation</td><td><span class="old-val">$145,000</span></td><td class="arrow-cell">→</td><td><span class="new-val-diff">$158,000</span></td></tr>
+          <tr><td><span class="av" style="background:#8A5A1A">DW</span><b>Derek Walsh</b></td><td style="color:#5E7480;font-size:12px">Title</td><td><span class="old-val">Senior PM</span></td><td class="arrow-cell">→</td><td><span class="new-val-diff">Principal PM</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="confirm-section">
+      <div class="confirm-row"><input type="checkbox" checked><div class="confirm-text">I confirm <b>47 employees</b> are correct and all values have been reviewed.</div></div>
+      <div class="confirm-row"><input type="checkbox" checked><div class="confirm-text">Changes take effect <b>July 15, 2025</b> and will reflect in the next payroll cycle.</div></div>
+      <div class="confirm-irr">
+        <div class="confirm-row"><input type="checkbox"><div class="confirm-text" style="color:#991B1B">⚠ I understand changes to <b>Slack</b> and <b>GitHub</b> apply immediately and <b>cannot be automatically reversed</b> by Tidewell.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-info" style="font-size:12px;color:#5E7480">Changes propagate automatically across all connected systems after commit.</div>
+    <div class="btn-row"><button class="btn-sec" onclick="goTo(4)">← Back</button><button class="btn-danger" onclick="goTo(6)">Commit bulk change</button></div>
+  </div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div class="success-screen" id="screen-6">
+  <div style="width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden">
+
+    <!-- Demo toggle -->
+    <div style="background:#1A1A1A;padding:8px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <span style="font-size:11px;color:#7F95A0;font-weight:600">DEMO STATE:</span>
+      <button onclick="showResultState('success')" id="toggle-success" style="padding:4px 12px;border-radius:4px;border:none;font-size:11px;font-weight:700;cursor:pointer;background:#1A7A4A;color:#fff">✓ Full Success</button>
+      <button onclick="showResultState('partial')" id="toggle-partial" style="padding:4px 12px;border-radius:4px;border:1px solid #555;font-size:11px;font-weight:700;cursor:pointer;background:transparent;color:#aaa">⚠ Partial Failure</button>
+    </div>
+
+    <!-- FULL SUCCESS STATE -->
+    <div id="result-success" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px;background:#F4F8F9">
+      <div style="width:64px;height:64px;background:#1A7A4A;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff">✓</div>
+      <div style="font-size:22px;font-weight:800;color:#1A1A1A">Bulk change complete</div>
+      <div style="font-size:14px;color:#5E7480;text-align:center;max-width:420px;line-height:1.6">47 employees updated successfully. All changes are propagating across Tidewell and connected systems. Effective July 15, 2025.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px">
+        <span style="background:#E6F4ED;color:#1A5A3A;font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px">✓ Payroll updated</span>
+        <span style="background:#E6F4ED;color:#1A5A3A;font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px">✓ Benefits recalculated</span>
+        <span style="background:#E6F4ED;color:#1A5A3A;font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px">✓ Time Off updated</span>
+        <span style="background:#E6F4ED;color:#1A5A3A;font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px">✓ Slack synced</span>
+        <span style="background:#E6F4ED;color:#1A5A3A;font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px">✓ GitHub synced</span>
+      </div>
+      <button onclick="goTo(1)" style="margin-top:8px;padding:8px 20px;border:1px solid #D5E2E6;border-radius:6px;background:#fff;color:#22343C;font-size:13px;font-weight:600;cursor:pointer">Start new bulk change</button>
+    </div>
+
+    <!-- PARTIAL FAILURE STATE -->
+    <div id="result-partial" style="flex:1;display:none;flex-direction:column;overflow:hidden">
+
+      <!-- Header -->
+      <div style="background:#fff;border-bottom:1px solid #D5E2E6;padding:16px 24px;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;background:#F59E0B;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:800">!</div>
+          <div>
+            <div style="font-size:16px;font-weight:800;color:#1A1A1A">Bulk change completed with issues</div>
+            <div style="font-size:12px;color:#5E7480;margin-top:2px">Review the failures below and take action. Successful records have already been applied.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary strip -->
+      <div style="background:#F4F8F9;border-bottom:1px solid #D5E2E6;padding:12px 24px;display:flex;gap:28px;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:#1A7A4A"></div>
+          <span style="font-size:13px;font-weight:700;color:#1A7A4A">42 records succeeded</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:#DC2626"></div>
+          <span style="font-size:13px;font-weight:700;color:#DC2626">5 records failed</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:#F59E0B"></div>
+          <span style="font-size:13px;font-weight:700;color:#92400E">2 integrations need attention</span>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div style="flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:20px">
+
+        <!-- Failed records section -->
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#7F95A0;margin-bottom:10px">Failed records — action required</div>
+          <div style="background:#fff;border:1px solid #FCA5A5;border-radius:8px;overflow:hidden">
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr style="background:#FFF8F8">
+                  <th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #FCA5A5">Employee</th>
+                  <th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #FCA5A5">Field</th>
+                  <th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #FCA5A5">Error</th>
+                  <th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #FCA5A5">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid #FEE2E2">
+                  <td style="padding:10px 16px;font-size:13px"><span style="display:inline-flex;width:26px;height:26px;border-radius:50%;background:#7A3A1A;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;margin-right:7px">TC</span><b>Tom Chen</b></td>
+                  <td style="padding:10px 16px;font-size:12px;color:#5E7480">Compensation</td>
+                  <td style="padding:10px 16px;font-size:12px"><span style="color:#DC2626">🔒</span> <span style="color:#DC2626;font-weight:600">Record locked</span> — being edited by Marcus Lee in another change</td>
+                  <td style="padding:10px 16px"><button style="padding:4px 10px;border:1px solid #0F5F73;border-radius:5px;font-size:11px;font-weight:600;color:#0F5F73;background:#fff;cursor:pointer">Retry when free</button></td>
+                </tr>
+                <tr style="border-bottom:1px solid #FEE2E2">
+                  <td style="padding:10px 16px;font-size:13px"><span style="display:inline-flex;width:26px;height:26px;border-radius:50%;background:#1A6A7A;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;margin-right:7px">SW</span><b>Sara Williams</b></td>
+                  <td style="padding:10px 16px;font-size:12px;color:#5E7480">Compensation</td>
+                  <td style="padding:10px 16px;font-size:12px"><span style="color:#DC2626">⚠</span> <span style="color:#DC2626;font-weight:600">Exceeds pay band</span> — $148,000 is above the L3 cap of $145,000</td>
+                  <td style="padding:10px 16px"><button style="padding:4px 10px;border:1px solid #0F5F73;border-radius:5px;font-size:11px;font-weight:600;color:#0F5F73;background:#fff;cursor:pointer">Edit value</button></td>
+                </tr>
+                <tr style="border-bottom:1px solid #FEE2E2">
+                  <td style="padding:10px 16px;font-size:13px"><span style="display:inline-flex;width:26px;height:26px;border-radius:50%;background:#5A1A8A;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;margin-right:7px">RM</span><b>Raj Mehta</b></td>
+                  <td style="padding:10px 16px;font-size:12px;color:#5E7480">Title</td>
+                  <td style="padding:10px 16px;font-size:12px"><span style="color:#DC2626">⚠</span> <span style="color:#DC2626;font-weight:600">Approval required</span> — title change to Director needs VP sign-off</td>
+                  <td style="padding:10px 16px"><button style="padding:4px 10px;border:1px solid #0F5F73;border-radius:5px;font-size:11px;font-weight:600;color:#0F5F73;background:#fff;cursor:pointer">Request approval</button></td>
+                </tr>
+                <tr style="border-bottom:1px solid #FEE2E2">
+                  <td style="padding:10px 16px;font-size:13px"><span style="display:inline-flex;width:26px;height:26px;border-radius:50%;background:#1A5A3A;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;margin-right:7px">AJ</span><b>Amy Johnson</b></td>
+                  <td style="padding:10px 16px;font-size:12px;color:#5E7480">Compensation</td>
+                  <td style="padding:10px 16px;font-size:12px"><span style="color:#DC2626">⚠</span> <span style="color:#DC2626;font-weight:600">On leave</span> — employee is on parental leave until Aug 1. Changes cannot apply mid-leave.</td>
+                  <td style="padding:10px 16px"><button style="padding:4px 10px;border:1px solid #0F5F73;border-radius:5px;font-size:11px;font-weight:600;color:#0F5F73;background:#fff;cursor:pointer">Schedule for Aug 1</button></td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 16px;font-size:13px"><span style="display:inline-flex;width:26px;height:26px;border-radius:50%;background:#8A1A2A;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;margin-right:7px">KP</span><b>Kyle Park</b></td>
+                  <td style="padding:10px 16px;font-size:12px;color:#5E7480">Title + Compensation</td>
+                  <td style="padding:10px 16px;font-size:12px"><span style="color:#DC2626">⚠</span> <span style="color:#DC2626;font-weight:600">Missing data</span> — employee profile incomplete. Work location required before title change.</td>
+                  <td style="padding:10px 16px"><button style="padding:4px 10px;border:1px solid #0F5F73;border-radius:5px;font-size:11px;font-weight:600;color:#0F5F73;background:#fff;cursor:pointer">Complete profile</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Integration status section -->
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#7F95A0;margin-bottom:10px">Downstream integration status</div>
+          <div style="background:#fff;border:1px solid #D5E2E6;border-radius:8px;overflow:hidden">
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr style="background:#F4F8F9">
+                  <th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #D5E2E6">System</th>
+                  <th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #D5E2E6">Status</th>
+                  <th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #D5E2E6">Details</th>
+                  <th style="padding:9px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7F95A0;border-bottom:1px solid #D5E2E6">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid #EDF3F5">
+                  <td style="padding:10px 16px;font-size:13px;font-weight:600">💰 Payroll</td>
+                  <td style="padding:10px 16px"><span style="background:#E6F4ED;color:#1A5A3A;font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px">✓ Updated</span></td>
+                  <td style="padding:10px 16px;font-size:12px;color:#5E7480">42 employees updated · effective July 15</td>
+                  <td style="padding:10px 16px;font-size:12px;color:#7F95A0">—</td>
+                </tr>
+                <tr style="border-bottom:1px solid #EDF3F5">
+                  <td style="padding:10px 16px;font-size:13px;font-weight:600">🏥 Benefits</td>
+                  <td style="padding:10px 16px"><span style="background:#E6F4ED;color:#1A5A3A;font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px">✓ Updated</span></td>
+                  <td style="padding:10px 16px;font-size:12px;color:#5E7480">3 eligibility recalculations complete</td>
+                  <td style="padding:10px 16px;font-size:12px;color:#7F95A0">—</td>
+                </tr>
+                <tr style="border-bottom:1px solid #EDF3F5;background:#FFF8F8">
+                  <td style="padding:10px 16px;font-size:13px;font-weight:600">💬 Slack</td>
+                  <td style="padding:10px 16px"><span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px">✗ Failed</span></td>
+                  <td style="padding:10px 16px;font-size:12px;color:#DC2626">API rate limit exceeded · 9 channel updates pending</td>
+                  <td style="padding:10px 16px"><button style="padding:4px 10px;border:1px solid #0F5F73;border-radius:5px;font-size:11px;font-weight:600;color:#0F5F73;background:#fff;cursor:pointer">Retry sync</button></td>
+                </tr>
+                <tr style="border-bottom:1px solid #EDF3F5;background:#FFFBF0">
+                  <td style="padding:10px 16px;font-size:13px;font-weight:600">🐙 GitHub</td>
+                  <td style="padding:10px 16px"><span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px">⏳ Pending</span></td>
+                  <td style="padding:10px 16px;font-size:12px;color:#92400E">5 team assignments queued · syncing in progress</td>
+                  <td style="padding:10px 16px;font-size:12px;color:#7F95A0">Auto-retrying…</td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 16px;font-size:13px;font-weight:600">📧 Google Workspace</td>
+                  <td style="padding:10px 16px"><span style="background:#E6F4ED;color:#1A5A3A;font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px">✓ Updated</span></td>
+                  <td style="padding:10px 16px;font-size:12px;color:#5E7480">6 group memberships updated</td>
+                  <td style="padding:10px 16px;font-size:12px;color:#7F95A0">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="background:#fff;border-top:1px solid #D5E2E6;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div style="font-size:13px;color:#4A4A4A"><b style="color:#1A7A4A">42 records applied</b> · <b style="color:#DC2626">5 need attention</b> · Changes cannot be automatically reversed</div>
+        <div style="display:flex;gap:10px">
+          <button style="padding:8px 16px;border:1px solid #D5E2E6;border-radius:6px;background:#fff;color:#22343C;font-size:13px;font-weight:600;cursor:pointer">↓ Download error report</button>
+          <button onclick="goTo(1)" style="padding:8px 20px;border:none;border-radius:6px;background:#0F5F73;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Done</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showResultState(state){
+  var s=document.getElementById('result-success');
+  var p=document.getElementById('result-partial');
+  var ts=document.getElementById('toggle-success');
+  var tp=document.getElementById('toggle-partial');
+  if(state==='success'){
+    s.style.display='flex';p.style.display='none';
+    ts.style.background='#1A7A4A';ts.style.color='#fff';ts.style.border='none';
+    tp.style.background='transparent';tp.style.color='#aaa';tp.style.border='1px solid #555';
+  } else {
+    s.style.display='none';p.style.display='flex';
+    tp.style.background='#D97706';tp.style.color='#fff';tp.style.border='none';
+    ts.style.background='transparent';ts.style.color='#aaa';ts.style.border='1px solid #555';
+  }
+}
+</script>
+
+
+<script>
+// ---- NAVIGATION ----
+function goTo(n){
+  document.querySelectorAll('.screen,.success-screen').forEach(function(s){s.classList.remove('active');});
+  var el=document.getElementById('screen-'+n);
+  if(el)el.classList.add('active');
+  var sb=document.getElementById('steps-bar');if(sb)sb.style.display=(n===0)?'none':'flex';
+  for(var i=1;i<=5;i++){
+    var s=document.getElementById('s-'+i);
+    if(!s)continue;
+    s.classList.remove('active','done');
+    var sn=s.querySelector('.sn');
+    if(i<n && n<=5){s.classList.add('done');sn.textContent='✓';}
+    else if(i===n){s.classList.add('active');sn.textContent=i;}
+    else{sn.textContent=i;}
+  }
+}
+
+// ---- ATTRIBUTE SELECTION ----
+var selectedAttrs = {};
+var templates = {
+  perf: ['Base Salary','Title','Level'],
+  reorg: ['Department','Manager','Title'],
+  office: ['Work Location','Office Assignment','Time Zone']
+};
+var attrCatMap = {
+  'Base Salary':'Compensation','OTE':'Compensation','Equity':'Compensation','Bonus Target':'Compensation','Pay Frequency':'Compensation',
+  'Title':'Employment Info','Level':'Employment Info','Department':'Employment Info','Manager':'Employment Info','Employment Type':'Employment Info','Cost Center':'Employment Info',
+  'Work Location':'Work Location','Office Assignment':'Work Location','Time Zone':'Work Location','Remote Status':'Work Location',
+  'Health Plan':'Benefits','HSA Contribution':'Benefits','401k Match':'Benefits','Commuter Benefit':'Benefits',
+  'Device':'IT & Access','SSO Groups':'IT & Access','GitHub Teams':'IT & Access','Slack Channels':'IT & Access',
+  'PTO Policy':'Time Off','Accrual Rate':'Time Off',
+  'Badge Access Level':'Custom','Performance Rating':'Custom','Fleet Vehicle':'Custom'
+};
+
+function toggleTemplate(t){
+  var card=document.getElementById('tpl-'+t);
+  var isActive=card.classList.contains('tpl-active');
+  if(isActive){
+    card.classList.remove('tpl-active');
+    templates[t].forEach(function(a){
+      var stillNeeded=false;
+      Object.keys(templates).forEach(function(k){
+        if(k!==t && document.getElementById('tpl-'+k).classList.contains('tpl-active') && templates[k].indexOf(a)>=0){
+          stillNeeded=true;
+        }
+      });
+      if(!stillNeeded)removeAttr(a);
+    });
+  } else {
+    card.classList.add('tpl-active');
+    templates[t].forEach(function(a){addAttr(a, attrCatMap[a]||'Employment Info');});
+  }
+  renderSelected();
+}
+
+function addAttr(name, cat){
+  if(!selectedAttrs[name]){
+    selectedAttrs[name]={cat:cat};
+    var cb=document.getElementById('cb-'+name);
+    if(cb)cb.checked=true;
+    var row=document.getElementById('ar-'+name);
+    if(row)row.classList.add('attr-checked');
+  }
+}
+
+function removeAttr(name){
+  delete selectedAttrs[name];
+  var cb=document.getElementById('cb-'+name);
+  if(cb)cb.checked=false;
+  var row=document.getElementById('ar-'+name);
+  if(row)row.classList.remove('attr-checked');
+}
+
+function toggleAttr(name, cat){
+  if(selectedAttrs[name]){removeAttr(name);}
+  else{addAttr(name, cat);}
+  renderSelected();
+}
+
+function clearAll(){
+  Object.keys(selectedAttrs).forEach(function(n){removeAttr(n);});
+  selectedAttrs={};
+  document.querySelectorAll('.template-card').forEach(function(c){c.classList.remove('tpl-active');});
+  renderSelected();
+}
+
+function removeAttrChip(name){
+  removeAttr(name);
+  renderSelected();
+}
+
+function renderSelected(){
+  var keys=Object.keys(selectedAttrs);
+  var count=keys.length;
+  document.getElementById('sp-count').textContent=count;
+  var cta=document.getElementById('sp-cta');
+  cta.disabled=(count===0);
+  cta.textContent=count>0 ? 'Continue with '+count+' attribute'+(count>1?'s':'')+' →' : 'Continue →';
+  var body=document.getElementById('sp-body');
+  var empty=document.getElementById('sp-empty');
+  if(count===0){
+    empty.style.display='block';
+    Array.from(body.children).forEach(function(c){if(c.id!=='sp-empty')c.remove();});
+    return;
+  }
+  empty.style.display='none';
+  Array.from(body.children).forEach(function(c){if(c.id!=='sp-empty')c.remove();});
+  keys.forEach(function(name){
+    var chip=document.createElement('div');
+    chip.className='sp-chip';
+
+    var left=document.createElement('div');
+    var chipName=document.createElement('div');
+    chipName.className='sp-chip-name';
+    chipName.textContent=name;
+    var chipCat=document.createElement('div');
+    chipCat.className='sp-chip-cat';
+    chipCat.textContent=selectedAttrs[name].cat;
+    left.appendChild(chipName);
+    left.appendChild(chipCat);
+
+    var removeBtn=document.createElement('span');
+    removeBtn.className='sp-chip-remove';
+    removeBtn.textContent='×';
+    (function(n){
+      removeBtn.onclick=function(){removeAttrChip(n);};
+    })(name);
+
+    chip.appendChild(left);
+    chip.appendChild(removeBtn);
+    body.appendChild(chip);
+  });
+  updateCatCounts();
+}
+
+function updateCatCounts(){
+  var catCounts={'Compensation':0,'Employment Info':0,'Work Location':0,'Benefits':0,'IT & Access':0,'Time Off':0,'Custom':0};
+  Object.values(selectedAttrs).forEach(function(v){if(catCounts[v.cat]!==undefined)catCounts[v.cat]++;});
+  var catIds={'Compensation':'sel-comp','Employment Info':'sel-emp','Work Location':'sel-loc','Benefits':'sel-ben','IT & Access':'sel-it','Time Off':'sel-to','Custom':'sel-custom'};
+  Object.keys(catIds).forEach(function(cat){
+    var el=document.getElementById(catIds[cat]);
+    if(!el)return;
+    var n=catCounts[cat];
+    if(n>0){el.style.display='inline-block';el.textContent=n+' selected';}
+    else{el.style.display='none';}
+  });
+}
+
+function toggleCat(id){
+  document.getElementById(id).classList.toggle('open');
+}
+
+function filterAttrs(query){
+  var q=query.toLowerCase().trim();
+  document.querySelectorAll('.attr-row').forEach(function(row){
+    var name=row.querySelector('.attr-name').textContent.toLowerCase();
+    var desc=row.querySelector('.attr-desc').textContent.toLowerCase();
+    row.style.display=(q===''||name.indexOf(q)>=0||desc.indexOf(q)>=0)?'flex':'none';
+  });
+  if(q!==''){
+    document.querySelectorAll('.cat-item').forEach(function(cat){
+      var visible=Array.from(cat.querySelectorAll('.attr-row')).some(function(r){return r.style.display!=='none';});
+      cat.style.display=visible?'':'none';
+      if(visible)cat.classList.add('open');
+    });
+  } else {
+    document.querySelectorAll('.cat-item').forEach(function(cat){cat.style.display='';});
+  }
+}
+
+// ---- INPUT VALIDATION — PRIYA ROW ----
+function checkPriyaValue(raw){
+  var num=parseFloat(raw.replace(/[^0-9.]/g,''));
+  var row=document.getElementById('priya-row');
+  var warnIcon=document.getElementById('priya-warn-icon');
+  var okIcon=document.getElementById('priya-ok-icon');
+  var errMsg=document.getElementById('priya-error-msg');
+  var errTag=document.getElementById('priya-error-tag');
+  var field=document.getElementById('priya-field');
+  var banner=document.getElementById('warn-banner');
+  var enteredVal=document.getElementById('warn-entered-val');
+
+  if(enteredVal){
+    enteredVal.textContent=isNaN(num) ? raw : ('$'+num.toLocaleString());
+  }
+
+  if(!isNaN(num) && num>=178000 && num<=220000){
+    row.style.background='#F0FAF4';
+    row.style.borderBottom='1px solid #6EE7A0';
+    field.style.borderColor='#1A7A4A';
+    field.style.background='#F0FAF4';
+    warnIcon.style.display='none';
+    okIcon.style.display='inline';
+    errMsg.style.display='none';
+    errTag.style.display='none';
+    if(banner)banner.style.display='none';
+  } else {
+    row.style.background='#FFF8F8';
+    row.style.borderBottom='1px solid #FCA5A5';
+    field.style.borderColor='#DC2626';
+    field.style.background='#FFF0F0';
+    warnIcon.style.display='inline';
+    okIcon.style.display='none';
+    errMsg.style.display='block';
+    errTag.style.display='inline-block';
+    if(banner)banner.style.display='flex';
+  }
+}
+
+
+function toggleMappingPanel(){
+  var panel=document.getElementById('ai-mapping-panel');
+  var btn=document.getElementById('ai-import-btn');
+  if(panel.style.display==='none'){
+    panel.style.display='block';
+    btn.textContent='✕ Close mapping preview';
+    btn.style.background='#fff';
+    btn.style.color='#0F5F73';
+    btn.style.border='1px solid #0F5F73';
+  } else {
+    panel.style.display='none';
+    btn.innerHTML='✦ AI-powered import <span style="font-size:10px;background:#fff;color:#0F5F73;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:800">NEW</span>';
+    btn.style.background='#0F5F73';
+    btn.style.color='#fff';
+    btn.style.border='none';
+  }
+}
+
+function confirmMapping(){
+  var panel=document.getElementById('ai-mapping-panel');
+  var btn=document.getElementById('ai-import-btn');
+  panel.style.display='none';
+  btn.innerHTML='✓ 47 rows imported <span style="font-size:10px;background:#fff;color:#1A7A4A;padding:1px 5px;border-radius:3px;margin-left:4px;font-weight:800">AI-mapped</span>';
+  btn.style.background='#1A7A4A';
+  btn.style.color='#fff';
+  btn.style.border='none';
+  btn.onclick=null;
+}
+goTo(0);
+</script>
+</body>
+</html>
