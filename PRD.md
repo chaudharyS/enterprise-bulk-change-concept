@@ -93,6 +93,3 @@ An earlier comparison of a simple bulk editor and CSV import was rejected becaus
 - **Guided wizard** chosen over spreadsheet-style, rule-engine and conversational approaches.
 - **No AI in the v1 core:** compensation changes can't be taken back once payroll runs, so v1 stays predictable and easy to review.
 - **Prevention first:** review steps before commit (preview, flags, scheduling) do the work an undo button would otherwise overpromise.
-
-## 9. Changes in v2
-- Added a zero state (screen 0) so the flow no longer starts mid-task.
