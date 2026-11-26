@@ -2,7 +2,7 @@
 
 Admins in an HR and payroll platform still change employee records one at a time. This prototype lets them change many at once: select a cohort, enter values (uniform or different per employee), preview the effect on every connected system, then commit or schedule.
 
-**Live demo:** https://chaudharys.github.io/enterprise-bulk-change-concept/
+**Interactive demo:** https://chaudharys.github.io/enterprise-bulk-change-concept/
 
 **Run locally:** open `index.html` in a browser. No build step, no dependencies.
 
